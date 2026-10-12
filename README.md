@@ -73,12 +73,25 @@ doesn't belong here.
 | `--headed` | Show the browser window while it runs |
 | `--wait MS` | Milliseconds to wait after page load (default 3000) |
 | `--out FILE` | Report path (default `devtools-report.json`) |
+| `--screenshot FILE` | Screenshot path (default `devtools-screenshot.png`) |
 
 Output:
-- `devtools-report.json` — summary, failed requests, console errors, slowest requests
-- `devtools-screenshot.png` — viewport screenshot
+- `devtools-report.json` — summary, failed requests, console errors, slowest requests, security headers
+- `devtools-screenshot.png` — full-page viewport screenshot
 
 Exit code is 0 when no failed requests, console errors, or page errors are found.
+
+## Tests
+
+Stdlib only, no test runner dependency:
+
+```
+python -m unittest discover -s tests -v
+```
+
+CI runs the suite on every push via `.github/workflows/ci.yml`. Browser
+behavior is not tested in CI; the unit tests cover the pure helpers
+(`parse_content_length`) that previously shipped a real bug.
 
 ### view-report.py options
 
