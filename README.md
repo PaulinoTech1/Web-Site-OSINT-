@@ -9,16 +9,28 @@ not scan, exploit, or bypass anything. See [SCOPE.md](SCOPE.md) for the full
 scope statement, including what the tool can and cannot tell you and the
 permissions required before use.
 
-## Quick start
+## Quick start (uv)
 
 ```
-pip install playwright
-playwright install chromium
-python3 devtools-auto.py https://example.com
-python3 view-report.py devtools-report.json
+uv sync
+uv run playwright install chromium
+uv run devtools-auto.py https://example.com
+uv run view-report.py devtools-report.json
 ```
 
 Open `report.html` in any browser for a clean, readable summary.
+
+### Why uv, and why this stays small
+
+This project uses `uv` instead of `pip` as a deliberate speed and scope
+decision. `uv sync` resolves and installs from `pyproject.toml` in seconds,
+into a project-local `.venv`. Nothing touches system Python.
+
+The dependency list is exactly one package: `playwright`. That's the only
+thing this project needs. `view-report.py` is stdlib-only. There is no web
+framework, no ORM, no test runner, no linter config. If a future addition
+can't justify its install time and its place in the dependency tree, it
+doesn't belong here.
 
 ## Tools
 
