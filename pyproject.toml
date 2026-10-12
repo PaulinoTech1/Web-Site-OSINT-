@@ -1,0 +1,8 @@
+[project]
+name = "web-site-osint"
+version = "0.1.0"
+description = "Scriptable DevTools inspection for websites"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright>=1.40",
+]
