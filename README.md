@@ -37,6 +37,15 @@ Open `report.html` in any browser for a clean, readable summary.
 > missing system libraries, run it from an elevated PowerShell so Playwright
 > can install the browser dependencies.
 
+### Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `uv: The term 'uv' is not recognized` (PowerShell) | uv is not installed, or the terminal was not restarted after install | Run the Windows install command above, then close and reopen PowerShell |
+| `playwright install` hangs or fails | Missing system libraries (Linux) or blocked download | Linux: `sudo uv run playwright install-deps`; then retry. Check firewall/proxy if the download itself fails |
+| `ERR_TUNNEL_CONNECTION_FAILED` in Chromium | Browser cannot reach the network through the environment's egress proxy | This tool needs direct network access from the browser. Run it on a normal workstation, not inside a sandboxed VM with proxy-only egress. See SCOPE.md |
+| `view-report.py: Cannot read devtools-report.json` | The inspection step failed or wrote to a different path | Check that `devtools-auto.py` completed successfully first |
+
 ### Why uv, and why this stays small
 
 This project uses `uv` instead of `pip` as a deliberate speed and scope
