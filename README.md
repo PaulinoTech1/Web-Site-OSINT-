@@ -9,6 +9,18 @@ not scan, exploit, or bypass anything. See [SCOPE.md](SCOPE.md) for the full
 scope statement, including what the tool can and cannot tell you and the
 permissions required before use.
 
+## Philosophy: results, not complexity
+
+This project is deliberately small. Two scripts, one dependency, stdlib tests,
+no framework, no server, no dashboard. Every line exists to answer one
+question: "what does this page do when it loads?"
+
+Complexity is easy to add and hard to remove. Each new dependency, abstraction,
+or feature is a maintenance burden and an attack surface. This tool proves its
+value the other way: a correct size metric, honest timing, documented
+limitations, and tests that catch real bugs. That is the engineering standard
+here. Simple is not the absence of rigor; it is rigor applied to scope.
+
 ## Quick start (uv)
 
 **Install uv first** (one time):
