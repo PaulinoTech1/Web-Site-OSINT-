@@ -48,6 +48,25 @@ When pointed at a publicly accessible URL, the tool observes:
 | Historical state | It captures the page as it is right now, not what it was yesterday. |
 | Mobile vs desktop differences | Unless configured, it uses a desktop viewport. Responsive issues need separate runs. |
 
+## Environment requirements and known limitations
+
+The tool needs a real Chromium browser with **direct network access**.
+It does not work in every environment:
+
+| Requirement | Detail |
+|-------------|--------|
+| Chromium | Installed via `playwright install chromium`, or pointed at a system Chromium |
+| Direct egress | The browser must reach the target site itself. Environments that force traffic through an authenticated MITM egress proxy may block Chromium's tunnel setup (`ERR_TUNNEL_CONNECTION_FAILED`) even when `curl` works fine. Verified 2026-10-12: the tool cannot run inside sandboxed VMs with proxy-only egress. Run it on a normal workstation or server instead. |
+| Display (optional) | Headless by default. `--headed` needs a display or Xvfb. |
+| Disk | ~170MB for the Chromium download, plus the Python venv |
+
+**This is a local workstation tool, not a cloud service.** It was designed to
+run on a developer's machine, not inside locked-down containers, CI runners
+with restricted egress, or serverless functions. If the browser cannot reach
+the network, the tool fails fast with a connection error. That is the correct
+behavior; do not work around it by disabling certificate validation or
+proxying through untrusted intermediaries.
+
 ## Permissions required before use
 
 **You must have permission to inspect the target site.** Specifically:
@@ -72,3 +91,18 @@ When pointed at a publicly accessible URL, the tool observes:
 - Penetration testers looking for an attack toolkit (use purpose-built tools with proper authorization)
 - Anyone conducting reconnaissance without permission
 - Automated scraping at scale (this tool loads full pages in a real browser; it is slow and obvious by design)
+
+## Scope boundaries: what this will never become
+
+To keep the project honest about its size and purpose, the following are
+explicitly out of scope and will not be added:
+
+- **No vulnerability scanning.** No payload injection, no CVE checks, no misconfiguration detection. That is a different tool.
+- **No credential handling.** No login automation, no session management, no cookie jars. Public pages only.
+- **No stealth.** No user-agent rotation, no proxy chains, no bot-evasion. The tool identifies as an automated browser.
+- **No bulk operation.** No sitemap crawling, no multi-target sweeps, no scheduling. One URL, one run.
+- **No server component.** No API, no dashboard, no database. Scripts that run locally and exit.
+
+Each of these would expand the attack surface of the tool itself and blur
+the line this project draws between defensive inspection and offensive
+capability. The line stays where it is.
