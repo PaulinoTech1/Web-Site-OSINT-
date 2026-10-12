@@ -48,6 +48,25 @@ When pointed at a publicly accessible URL, the tool observes:
 | Historical state | It captures the page as it is right now, not what it was yesterday. |
 | Mobile vs desktop differences | Unless configured, it uses a desktop viewport. Responsive issues need separate runs. |
 
+## How to read the output
+
+A report from this tool is the **start** of an investigation, not the end of
+one. Treat every finding as the initiation of a deeper, approved OSINT dive:
+
+- A clean report does not mean a site is secure. It means nothing failed
+  during one automated page load.
+- A failed request does not mean a vulnerability. It means an asset didn't
+  load; the cause could be a typo, a deleted file, or a CDN hiccup.
+- A console error does not mean exploitable. It means JavaScript threw;
+  triage it like any other bug report.
+
+The tool was developed and tested primarily in a Windows environment. That
+configuration is **not conclusive**: browser behavior, rendering, and network
+conditions vary across operating systems, and a single run captures one
+moment in time. Do not treat one report as a final assessment. Corroborate
+findings manually before acting on them, and stay within the authorization
+scope described above.
+
 ## Environment requirements and known limitations
 
 The tool needs a real Chromium browser with **direct network access**.
