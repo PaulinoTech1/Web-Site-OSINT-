@@ -88,7 +88,7 @@ def main() -> int:
                     "status": resp.status,
                     "content_type": resp.headers.get("content-type", ""),
                     # From Content-Length header; 0 = unknown (e.g. chunked).
-                    "size_bytes": parse_content_length(resp.headers),
+                    "size": parse_content_length(resp.headers),
                     # Wall-clock ms from request to response. -1 = unknown.
                     "timing_ms": elapsed_ms,
                 }
@@ -159,7 +159,7 @@ def main() -> int:
             key=lambda r: r["timing_ms"], reverse=True,
         )[:10],
         "notes": [
-            "size_bytes comes from the Content-Length header; 0 means unknown (e.g. chunked encoding), not empty.",
+            "size comes from the Content-Length header; 0 means unknown (e.g. chunked encoding), not empty.",
             "timing_ms is wall-clock per request; -1 means the start was not observed.",
             "A clean report means this one headless Chromium load produced no failures. See SCOPE.md.",
         ],
