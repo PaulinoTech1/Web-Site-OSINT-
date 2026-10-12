@@ -47,6 +47,23 @@ When pointed at a publicly accessible URL, the tool observes:
 | Whether a site is "secure" | Absence of console errors is not a security assessment. This tool is not a vulnerability scanner. |
 | Historical state | It captures the page as it is right now, not what it was yesterday. |
 | Mobile vs desktop differences | Unless configured, it uses a desktop viewport. Responsive issues need separate runs. |
+| Request/response bodies | Not captured. The tool records metadata (URL, status, headers, timing), not payloads. |
+| WebSocket frames | Not captured. Long-lived connections are invisible beyond the initial handshake. |
+| Certificate details | Not extracted. Use `openssl s_client` or certificate transparency logs for cert analysis. |
+| Service worker internals | Traffic served from cache by a service worker may not appear as network requests. |
+
+## A note on the name
+
+The repository is called "Web-Site-OSINT" but the tool performs none of the
+traditional OSINT primitives: no WHOIS lookups, no DNS enumeration, no
+certificate transparency searches, no subdomain discovery, no technology
+fingerprinting beyond incidental request URLs, no historical archive queries.
+
+The name reflects the original intent (observing what a site reveals about
+itself to a visitor), not the full OSINT discipline. If you need those
+primitives, use dedicated tools: `whois`, `dig`, crt.sh, the Wayback Machine,
+Wappalyzer. This tool answers one question: "what does this page do when it
+loads?" Everything else is out of scope.
 
 ## How to read the output
 
