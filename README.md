@@ -11,6 +11,18 @@ permissions required before use.
 
 ## Quick start (uv)
 
+**Install uv first** (one time):
+
+| OS | Command |
+|----|---------|
+| Windows (PowerShell) | `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"` |
+| macOS / Linux | `curl -LsSf https://astral.sh/uv/install.sh | sh` |
+
+After installing, restart your terminal (or run `refreshenv` on Windows) so
+`uv` is on your PATH. Verify with `uv --version`.
+
+Then:
+
 ```
 uv sync
 uv run playwright install chromium
@@ -19,6 +31,11 @@ uv run view-report.py devtools-report.json
 ```
 
 Open `report.html` in any browser for a clean, readable summary.
+
+> **Windows note:** all `uv` commands above work identically in PowerShell
+> once uv is installed. If `uv run playwright install chromium` fails on
+> missing system libraries, run it from an elevated PowerShell so Playwright
+> can install the browser dependencies.
 
 ### Why uv, and why this stays small
 
