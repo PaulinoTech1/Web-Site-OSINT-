@@ -22,10 +22,8 @@ import sys
 import time
 from datetime import datetime, timezone
 
-try:
-    from playwright.sync_api import sync_playwright
-except ImportError:
-    sys.exit("uv sync  (or: pip install playwright && playwright install chromium)")
+# NOTE: playwright is imported lazily inside main() so the pure helpers
+# (parse_content_length) stay importable without it, e.g. for unit tests.
 
 # Truncation cap for console/page-error text. Flagged in output when hit.
 TEXT_CAP = 2000
@@ -54,11 +52,17 @@ def parse_content_length(headers: dict) -> int:
 
 
 def main() -> int:
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        sys.exit("uv sync  (or: pip install playwright && playwright install chromium)")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
     ap.add_argument("--headed", action="store_true", help="show the browser window")
     ap.add_argument("--wait", type=int, default=3000, help="ms to wait after load")
     ap.add_argument("--out", default="devtools-report.json")
+    ap.add_argument("--screenshot", default="devtools-screenshot.png")
     args = ap.parse_args()
 
     network: list[dict] = []
@@ -66,7 +70,10 @@ def main() -> int:
     page_errors: list[dict] = []
     security_headers: dict = {}
     handler_errors = 0
-    request_start: dict = {}  # id(request) -> monotonic start time
+    # Request -> monotonic start time. Keyed on the object itself, not id():
+    # id() values can be reused after garbage collection, which would corrupt
+    # timing. The strong reference also keeps entries valid until popped.
+    request_start: dict = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=not args.headed)
@@ -74,13 +81,17 @@ def main() -> int:
 
         # --- Network tab: wall-clock timing per request ---
         def on_request(req):
-            request_start[id(req)] = time.monotonic()
+            request_start[req] = time.monotonic()
+
+        def on_request_failed(req):
+            # Drop the timing entry so incomplete requests don't leak.
+            request_start.pop(req, None)
 
         def on_response(resp):
             nonlocal handler_errors
             try:
                 req = resp.request
-                start = request_start.pop(id(req), None)
+                start = request_start.pop(req, None)
                 elapsed_ms = round((time.monotonic() - start) * 1000) if start else -1
                 entry = {
                     "url": resp.url,
@@ -93,16 +104,19 @@ def main() -> int:
                     "timing_ms": elapsed_ms,
                 }
                 network.append(entry)
-                # Capture security headers from the top-level document.
-                if req.resource_type == "document" and resp.url.rstrip("/") == args.url.rstrip("/"):
+                # Capture security headers from the top-level navigation.
+                # Last navigation response wins, so redirects are handled:
+                # the final document's headers are what matter.
+                if req.is_navigation_request():
                     for h in SECURITY_HEADERS:
                         if h in resp.headers:
                             security_headers[h] = resp.headers[h]
-            except Exception as e:
+            except Exception:
                 # Never silently drop: count it so the report shows the gap.
                 handler_errors += 1
 
         page.on("request", on_request)
+        page.on("requestfailed", on_request_failed)
         page.on("response", on_response)
 
         # --- Console tab ---
@@ -132,7 +146,7 @@ def main() -> int:
         page.wait_for_timeout(args.wait)
 
         title = page.title()
-        page.screenshot(path="devtools-screenshot.png", full_page=True)
+        page.screenshot(path=args.screenshot, full_page=True)
         browser.close()
 
     failed = [r for r in network if r["status"] >= 400]
@@ -171,7 +185,7 @@ def main() -> int:
     print(f"Console errors: {len(errors)}, page errors: {len(page_errors)}")
     if handler_errors:
         print(f"WARNING: {handler_errors} response(s) failed to record (see handler_errors)")
-    print(f"Report: {args.out}, screenshot: devtools-screenshot.png")
+    print(f"Report: {args.out}, screenshot: {args.screenshot}")
     return 0 if not failed and not errors and not page_errors else 1
 
 
